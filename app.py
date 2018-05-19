@@ -1,6 +1,15 @@
+#encoding: utf-8
 
 from flask import Flask, request, url_for
+from flask_sqlalchemy import SQLAlchemy
+import config
+
 app = Flask(__name__)
+app.config.from_object(config)
+db = SQLAlchemy(app)
+
+# test the SQLAlchemy configuration
+db.create_all()
 
 import os
 indexFilePath = os.getcwd()
