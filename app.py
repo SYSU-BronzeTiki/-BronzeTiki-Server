@@ -1,28 +1,23 @@
 #encoding: utf-8
 
-from flask import Flask, request, url_for
-from flask_sqlalchemy import SQLAlchemy
-import config
+from model import *
+from flask import render_template, url_for
 
-app = Flask(__name__)
-app.config.from_object(config)
-db = SQLAlchemy(app)
-
-# test the SQLAlchemy configuration
+# create data tables
 db.create_all()
 
-import os
-indexFilePath = os.getcwd()
-indexFilePath = os.path.join(indexFilePath, 'templates\index.html')
+# import os
+# indexFilePath = os.getcwd()
+# indexFilePath = os.path.join(indexFilePath, 'templates\index.html')
 
 @app.route('/')
 def index():
-    indexStr = ''
-    with open(indexFilePath, 'r') as f:
-        indexStr = f.read()
-    return indexStr
-
-debug=True
+    return render_template('index.html')
+    # indexStr = ''
+    # with open(indexFilePath, 'r') as f:
+    #     indexStr = f.read()''
+    # return indexStr
 
 if __name__ == '__main__':
+    debug=True
     app.run(host='0.0.0.0')
