@@ -9,6 +9,10 @@ app = Flask(__name__, static_folder='./dist/static', template_folder='./dist')
 app.config.from_object(config)
 db = SQLAlchemy(app)
 
+app.secret_key = b'\x98\xc0&\xa1\x15\xaf\x8b\x16\x99\xcb\x90\x17$\xf1\xec\xfd\xe1\xadNo\xa3g\xae\xf6'
+
+salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
+
 # Data table User
 # create table user (
 #     username varchar(50),
@@ -24,7 +28,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     __tablename__ = 'user'
     username = db.Column(db.String(50), primary_key=True)
-    password = db.Column(db.String(8), nullable=False)
+    password = db.Column(db.String(256), nullable=False)
     avator = db.Column(db.BLOB)
     nickname = db.Column(db.String(50))
     paypassword = db.Column(db.String(8))
