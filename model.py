@@ -34,6 +34,9 @@ class User(db.Model):
     paypassword = db.Column(db.String(8))
     description = db.Column(db.String(256))
     money = db.Column(db.Integer)
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table Movie
 # create table movie (
@@ -57,6 +60,9 @@ class Movie(db.Model):
     movieType = db.Column(db.String(50))
     description = db.Column(db.String(256))
     rating = db.Column(db.Integer)
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table Comment
 # create table comment (
@@ -78,6 +84,9 @@ class Comment(db.Model):
     description = db.Column(db.String(256)),
     username = db.Column(db.String(50), db.ForeignKey('user.username'))
     movieID = db.Column(db.Integer, db.ForeignKey('movie.movieID'))
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table MovieHall
 # create table movieHall(
@@ -88,6 +97,9 @@ class MovieHall(db.Model):
     __tablename__ = 'movieHall'
     movieHallID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     address = db.Column(db.String(256))
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table Screen
 # create table screen (
@@ -107,6 +119,9 @@ class Screen(db.Model):
     ticketPrice = db.Column(db.Integer)
     movieHallID = db.Column(db.Integer)
     movieID = db.Column(db.Integer)
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table Seat
 # create table seat (
@@ -121,6 +136,9 @@ class Seat(db.Model):
     seatID = db.Column(db.Integer, primary_key=True, autoincrement=True)
     isAvailable = db.Column(db.Boolean, nullable=False)
     screenID = db.Column(db.Integer, db.ForeignKey('screen.screenID'))
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
 # Data table MovieOrder 
 # create table movieorder (
@@ -146,4 +164,7 @@ class Order(db.Model):
     price = db.Column(db.Integer)
     username = db.Column(db.String(50), db.ForeignKey('user.username'))
     seatID = db.Column(db.Integer, db.ForeignKey('seat.seatID'))
+    __table_args__ = {
+        "mysql_charset" : "utf8"
+    }
 
