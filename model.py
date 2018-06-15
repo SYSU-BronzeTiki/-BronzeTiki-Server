@@ -9,8 +9,6 @@ app = Flask(__name__, static_folder='./dist/static', template_folder='./dist')
 app.config.from_object(config)
 db = SQLAlchemy(app)
 
-app.secret_key = b'\x98\xc0&\xa1\x15\xaf\x8b\x16\x99\xcb\x90\x17$\xf1\xec\xfd\xe1\xadNo\xa3g\xae\xf6'
-
 salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
 
 # Data table User

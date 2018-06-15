@@ -13,3 +13,6 @@ SQLALCHEMY_DATABASE_URI = "{}+{}://{}:{}@{}:{}/{}?charset=utf8".format(
     DIALECT, DRIVER, USERNAME, PASSWORD, HOST, PORT, DATABASE)
 
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# os.urandom(24)
+SECRET_KEY = b'\xf9\xcb!v3\xbf\x06\x01\xcd\xa7rVL\xb8\x1dH0\x15!d\xa1\xa7\xe0\xca'
