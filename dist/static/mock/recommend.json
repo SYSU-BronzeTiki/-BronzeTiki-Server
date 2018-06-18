@@ -1,0 +1,28 @@
+{
+	"ret": true,
+	"data":{
+		"movies": [{
+			"id": 1,
+			"name": "深海越狱",
+			"poster": "https://p0.meituan.net/128.180/movie/200526fd0facc141caeef984314f7ef8328722.jpg",
+			"rating": 5,
+			"classification": ["剧情", "动作", "犯罪"],
+			"primaryActors": "深海越狱演员",
+			"decoration": 104,
+			"showtime": "2018-06-08",
+			"description": "深海越狱介绍",
+			"status": true
+		}, {
+			"id": 2,
+			"name": "超时空同居",
+			"poster": "https://p0.meituan.net/148.208/movie/f193e43ca706aa6bc6a26d6f53f0115a5315542.jpg",
+			"rating": 4,
+			"classification": ["喜剧", "爱情", "奇幻"],
+			"primaryActors": "苏伦(导演) / 雷佳音 / 佟丽娅 / 张衣",
+			"decoration": 101,
+			"showtime": "2018-06-08",
+			"description": "超时空同居介绍",
+			"status": true
+		}]
+	}
+}
