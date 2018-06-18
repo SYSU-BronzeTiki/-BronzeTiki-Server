@@ -73,7 +73,7 @@ def login_the_user(username, password, jsonData):
         jsonData['message'] = 'Invalid username'
         return False
 
-@app.route('/api/users/login', methods=['POST', 'GET'])
+@app.route('/api/users/login', methods=['POST', 'GET', 'DELETE'])
 def user_login():
     # POST
     if request.method == 'POST':
@@ -104,12 +104,23 @@ def user_login():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-    # GET
-    if 'username' in session:
-        if request.args.get('logout'):
-            print(session.get('username', 'none') + " logout")
-            session.clear()
-        return redirect(url_for('front_end'))
+    # DELETE
+    if  request.method == 'DELETE':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        if 'username' in session:
+            if request.args.get('logout'):
+                session.clear()
+                jsonData['message'] = 'Logout succeeded'
+                jsonData['status'] = 200
+        else:
+            jsonData['message'] = 'Logout failed'
+            jsonData['status'] = 0
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
     # GET
     return redirect(url_for('front_end'))
 
