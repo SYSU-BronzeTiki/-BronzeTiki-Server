@@ -30,7 +30,7 @@ def user_register():
     if request.method == 'POST':
         jsonData = {}
         jsonData['timestamp'] = time.time()
-
+        # print(str(request.form))
         if 'username' not in request.form:
             jsonData['status'] = '0'
             jsonData['message'] = 'No username'
@@ -53,20 +53,24 @@ def user_register():
 def login_the_user(username, password, jsonData):
     result = User.query.filter(User.username == username).first()
     md5psw = str(hashlib.md5((salt + password).encode()).digest())
-    if result and result.password == md5psw:
-        try:
-            result = User.query.filter(User.username == username).first()
-            jsonData['avator'] = result.avator
-            jsonData['nickname'] = result.nickname
-            jsonData['description'] = result.description
-            jsonData['money'] = result.money
-            jsonData['reason'] = 'Login succeeded'
-            return True
-        except:
-            jsonData['reason'] = 'Login failed'
+    if result:
+        if result.password == md5psw:
+            try:
+                result = User.query.filter(User.username == username).first()
+                jsonData['avator'] = result.avator
+                jsonData['nickname'] = result.nickname
+                jsonData['description'] = result.description
+                jsonData['money'] = result.money
+                jsonData['message'] = 'Login succeeded'
+                return True
+            except:
+                jsonData['message'] = 'Login failed'
+                return False
+        else:
+            jsonData['message'] = 'Invalid password'
             return False
     else:
-        jsonData['reason'] = 'Invalid username/password'
+        jsonData['message'] = 'Invalid username'
         return False
 
 @app.route('/api/users/login', methods=['POST', 'GET'])
