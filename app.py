@@ -153,17 +153,22 @@ def state():
     message = json.dumps(jsonData) # convert to json
     return message
 
-def change_the_password(username, password, jsonData):
+def change_the_password(username, oldpassword, password, jsonData):
     result = User.query.filter(User.username == username).first()
+    md5oldpsw = str(hashlib.md5((salt + oldpassword).encode()).digest())
     md5psw = str(hashlib.md5((salt + password).encode()).digest())
     if result:
-        try:
-            result.password = md5psw
-            db.session.commit()
-            jsonData['message'] = 'Change password succeeded'
-            return True
-        except:
-            jsonData['message'] = 'Change password failed'
+        if result.password == md5oldpsw:
+            try:
+                result.password = md5psw
+                db.session.commit()
+                jsonData['message'] = 'Change password succeeded'
+                return True
+            except:
+                jsonData['message'] = 'Change password failed'
+                return False
+        else:
+            jsonData['message'] = 'Invalid old password'
             return False
     else:
         jsonData['message'] = 'Invalid username'
@@ -175,14 +180,21 @@ def user_password():
         jsonData = {}
         jsonData['timestamp'] = time.time()
         
-        if 'username' in session:
-            if change_the_password(session.get('username'), request.form['password'], jsonData):
+        if 'username' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No username'
+        elif 'opassword' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No old password'
+        elif 'password' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No password'
+        else:
+            # validate and change
+            if change_the_password(request.form['username'], request.form['opassword'], request.form['password'], jsonData):
                 jsonData['status'] = 200
             else:
                 jsonData['status'] = 0
-        else:
-            jsonData['message'] = 'Change password failed: Offline'
-            jsonData['status'] = 0
 
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
