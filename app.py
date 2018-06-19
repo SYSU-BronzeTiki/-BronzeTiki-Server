@@ -183,15 +183,15 @@ def user_password():
         if 'username' not in request.form:
             jsonData['status'] = '0'
             jsonData['message'] = 'No username'
-        elif 'opassword' not in request.form:
+        elif 'oldPassword' not in request.form:
             jsonData['status'] = '0'
             jsonData['message'] = 'No old password'
-        elif 'password' not in request.form:
+        elif 'newPassword' not in request.form:
             jsonData['status'] = '0'
-            jsonData['message'] = 'No password'
+            jsonData['message'] = 'No new password'
         else:
             # validate and change
-            if change_the_password(request.form['username'], request.form['opassword'], request.form['password'], jsonData):
+            if change_the_password(request.form['username'], request.form['oldPassword'], request.form['newPassword'], jsonData):
                 jsonData['status'] = 200
             else:
                 jsonData['status'] = 0
