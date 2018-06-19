@@ -153,6 +153,41 @@ def state():
     message = json.dumps(jsonData) # convert to json
     return message
 
+def change_the_password(username, password, jsonData):
+    result = User.query.filter(User.username == username).first()
+    md5psw = str(hashlib.md5((salt + password).encode()).digest())
+    if result:
+        try:
+            result.password = md5psw
+            db.session.commit()
+            jsonData['message'] = 'Change password succeeded'
+            return True
+        except:
+            jsonData['message'] = 'Change password failed'
+            return False
+    else:
+        jsonData['message'] = 'Invalid username'
+        return False
+
+@app.route('/api/users/password', methods=['POST'])
+def user_password():
+    if request.method == 'POST':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        
+        if 'username' in session:
+            if change_the_password(session.get('username'), request.form['password'], jsonData):
+                jsonData['status'] = 200
+            else:
+                jsonData['status'] = 0
+        else:
+            jsonData['message'] = 'Change password failed: Offline'
+            jsonData['status'] = 0
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
 @app.route('/api/users/avator', methods=['POST'])
 def user_avator():
     if request.method == 'POST':
