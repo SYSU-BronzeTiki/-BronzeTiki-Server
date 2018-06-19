@@ -14,7 +14,7 @@ salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
 # Data table User
 # create table user (
 #     username varchar(50),
-#     password varchar(8),
+#     password varchar(256),
 #     avator BLOB,
 #     nickname varchar(50),
 #     paypassword varchar(8),
@@ -23,11 +23,12 @@ salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
 #     # commentID int,
 #     primary key (username)
 # )
+# alter table user modify column avator varchar(256);
 class User(db.Model):
     __tablename__ = 'user'
     username = db.Column(db.String(50), primary_key=True)
     password = db.Column(db.String(256), nullable=False)
-    avator = db.Column(db.BLOB)
+    avator = db.Column(db.String(256))
     nickname = db.Column(db.String(50))
     paypassword = db.Column(db.String(8))
     description = db.Column(db.String(256))

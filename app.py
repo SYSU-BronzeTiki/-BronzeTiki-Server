@@ -3,7 +3,8 @@
 from model import *
 from flask import request, session, redirect, render_template, url_for, jsonify, abort
 import json
-import hashlib, random, time
+import hashlib, random, time, os
+from werkzeug.utils import secure_filename
 
 # create data tables
 db.create_all()
@@ -105,15 +106,15 @@ def user_login():
         message = json.dumps(jsonData) # convert to json
         return message
     # DELETE
-    if  request.method == 'DELETE':
+    if request.method == 'DELETE':
         jsonData = {}
         jsonData['timestamp'] = time.time()
 
         if 'username' in session:
-            if request.args.get('logout'):
-                session.clear()
-                jsonData['message'] = 'Logout succeeded'
-                jsonData['status'] = 200
+            # if request.args.get('logout'):
+            session.clear()
+            jsonData['message'] = 'Logout succeeded'
+            jsonData['status'] = 200
         else:
             jsonData['message'] = 'Logout failed'
             jsonData['status'] = 0
@@ -152,6 +153,40 @@ def state():
     message = json.dumps(jsonData) # convert to json
     return message
 
+@app.route('/api/users/avator', methods=['POST'])
+def user_avator():
+    if request.method == 'POST':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        
+        if 'file' not in request.files:
+            jsonData['message'] = 'No file part'
+            jsonData['status'] = 0
+        else:
+            f = request.files['file']
+            if f.filename == '':
+                jsonData['message'] = 'Empty file'
+                jsonData['status'] = 0
+            else:
+                diffStr = session.get('username', 'none')
+                prefStr = str(hashlib.md5(diffStr.encode()).digest()[:10])
+                filename = secure_filename(prefStr + f.filename)
+                basePath = os.path.dirname(__file__)
+                uploadPath = os.path.join(basePath, 'dist/static/img', filename)
+                f.save(uploadPath)
+                jsonData['message'] = 'Upload-file succeed'
+                jsonData['status'] = 200
+                try:
+                    result = User.query.filter(User.username == diffStr).first()
+                    result.avator = '/static/img/' + filename
+                    db.session.commit()
+                except:
+                    jsonData['message'] = 'Upload-file fail'
+                    jsonData['status'] = 0
+
+    print(str(jsonData))           # debug the message
+    message = json.dumps(jsonData) # convert to json
+    return message
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
