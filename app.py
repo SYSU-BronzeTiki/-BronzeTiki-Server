@@ -26,7 +26,7 @@ def register_a_user(username, password, jsonData):
         jsonData['message'] = 'Username existed'
         return False
 
-@app.route('/api/users/register', methods=['POST', 'GET'])
+@app.route('/api/users/register', methods=['POST'])
 def user_register():
     if request.method == 'POST':
         jsonData = {}
@@ -48,8 +48,6 @@ def user_register():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-    # GET
-    return redirect(url_for('front_end'))
 
 def login_the_user(username, password, jsonData):
     result = User.query.filter(User.username == username).first()
@@ -74,7 +72,7 @@ def login_the_user(username, password, jsonData):
         jsonData['message'] = 'Invalid username'
         return False
 
-@app.route('/api/users/login', methods=['POST', 'GET', 'DELETE'])
+@app.route('/api/users/login', methods=['POST', 'DELETE'])
 def user_login():
     # POST
     if request.method == 'POST':
@@ -122,16 +120,7 @@ def user_login():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-    # GET
-    return redirect(url_for('front_end'))
 
-@app.route('/api/movies', methods=['POST', 'GET'])
-def movies():
-    pass
-
-@app.route('/api/orders', methods=['POST', 'GET'])
-def orders():
-    pass
 
 @app.route('/api/state', methods=['GET', 'POST'])
 def state():
@@ -174,9 +163,9 @@ def change_the_password(username, oldpassword, password, jsonData):
         jsonData['message'] = 'Invalid username'
         return False
 
-@app.route('/api/users/password', methods=['POST'])
+@app.route('/api/users/password', methods=['PATCH'])
 def user_password():
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         jsonData = {}
         jsonData['timestamp'] = time.time()
         
@@ -200,9 +189,9 @@ def user_password():
         message = json.dumps(jsonData) # convert to json
         return message
 
-@app.route('/api/users/avator', methods=['POST'])
+@app.route('/api/users/avator', methods=['PATCH'])
 def user_avator():
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         jsonData = {}
         jsonData['timestamp'] = time.time()
         
@@ -231,9 +220,18 @@ def user_avator():
                     jsonData['message'] = 'Upload-file fail'
                     jsonData['status'] = 0
 
-    print(str(jsonData))           # debug the message
-    message = json.dumps(jsonData) # convert to json
-    return message
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+
+@app.route('/api/movies', methods=['POST', 'GET'])
+def movies():
+    pass
+
+@app.route('/api/orders', methods=['POST', 'GET'])
+def orders():
+    pass
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
