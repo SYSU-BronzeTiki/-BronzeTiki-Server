@@ -10,6 +10,7 @@ app.config.from_object(config)
 db = SQLAlchemy(app)
 
 salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
+paySalt = "sd$S#A*%${ds]dddfa}d54789eqw16^&^d<?dss"
 
 # Data table User
 # create table user (
@@ -17,20 +18,25 @@ salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
 #     password varchar(256),
 #     avator BLOB,
 #     nickname varchar(50),
-#     paypassword varchar(8),
+#     paypassword varchar(256),
 #     description varchar(256),
 #     money int,
 #     # commentID int,
 #     primary key (username)
 # )
 # alter table user modify column avator varchar(256);
+# alter table user alter column money set default 1000;
+# alter table user alter column avator set default "/static/img/avatar_2x.png";
+# alter table user alter column nickname set default "Tony";
+# alter table user alter column description set default "freedom and equality";
+# alter table user modify column paypassword varchar(256);
 class User(db.Model):
     __tablename__ = 'user'
     username = db.Column(db.String(50), primary_key=True)
     password = db.Column(db.String(256), nullable=False)
     avator = db.Column(db.String(256))
     nickname = db.Column(db.String(50))
-    paypassword = db.Column(db.String(8))
+    paypassword = db.Column(db.String(256))
     description = db.Column(db.String(256))
     money = db.Column(db.Integer)
     __table_args__ = {

@@ -14,7 +14,9 @@ def register_a_user(username, password, jsonData):
     if len(result) == 0:
         try:
             md5psw = str(hashlib.md5((salt + password).encode()).digest())
-            user = User(username=username, password=md5psw)
+            paypassword = "123456"
+            md5paypsw = str(hashlib.md5((paySalt + paypassword).encode()).digest())
+            user = User(username=username, password=md5psw, paypassword=md5paypsw)
             db.session.add(user)
             db.session.commit()
             jsonData['message'] = 'Register succeeded'
