@@ -34,11 +34,11 @@ class User(db.Model):
     __tablename__ = 'user'
     username = db.Column(db.String(50), primary_key=True)
     password = db.Column(db.String(256), nullable=False)
-    avator = db.Column(db.String(256))
-    nickname = db.Column(db.String(50))
+    avator = db.Column(db.String(256), default="/static/img/avatar_2x.png")
+    nickname = db.Column(db.String(50), default="Tony")
     paypassword = db.Column(db.String(256))
-    description = db.Column(db.String(256))
-    money = db.Column(db.Integer)
+    description = db.Column(db.String(256), default="freedom and equality")
+    money = db.Column(db.Integer, default=1000)
     __table_args__ = {
         "mysql_charset" : "utf8"
     }
