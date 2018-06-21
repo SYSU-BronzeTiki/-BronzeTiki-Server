@@ -226,6 +226,35 @@ def user_avator():
         message = json.dumps(jsonData) # convert to json
         return message
 
+@app.route('/api/users/nicknameAndDescription', methods=['PATCH'])
+def user_nicknameAndDescription():
+    if request.method == 'PATCH':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        
+        if 'nickname' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No nickname'
+        elif 'description' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No description'
+        else:
+            # change
+            try:
+                username = session.get('usename')
+                result = User.query.filter(User.username == username).first()
+                result.nickname = request.form['nickname']
+                result.description = request.form['description']
+                db.session.commit()
+                jsonData['message'] = 'Update succeed'
+                jsonData['status'] = 0
+            except:
+                jsonData['message'] = 'Update fail'
+                jsonData['status'] = 0
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
 
 @app.route('/api/movies', methods=['POST', 'GET'])
 def movies():
