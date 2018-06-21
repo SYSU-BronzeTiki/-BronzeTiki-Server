@@ -238,10 +238,13 @@ def user_nicknameAndDescription():
         elif 'description' not in request.form:
             jsonData['status'] = '0'
             jsonData['message'] = 'No description'
+        elif 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
         else:
             # change
             try:
-                username = session.get('usename')
+                username = session.get('usename', 'none')
                 result = User.query.filter(User.username == username).first()
                 result.nickname = request.form['nickname']
                 result.description = request.form['description']
