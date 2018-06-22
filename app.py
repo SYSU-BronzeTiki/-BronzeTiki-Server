@@ -191,15 +191,18 @@ def user_password():
         message = json.dumps(jsonData) # convert to json
         return message
 
-@app.route('/api/users/avator', methods=['PATCH'])
+@app.route('/api/users/avatar', methods=['POST'])
 def user_avator():
-    if request.method == 'PATCH':
+    if request.method == 'POST':
         jsonData = {}
         jsonData['timestamp'] = time.time()
         
         if 'file' not in request.files:
             jsonData['message'] = 'No file part'
             jsonData['status'] = 0
+        elif 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
         else:
             f = request.files['file']
             if f.filename == '':
@@ -212,6 +215,7 @@ def user_avator():
                 basePath = os.path.dirname(__file__)
                 uploadPath = os.path.join(basePath, 'dist/static/img', filename)
                 f.save(uploadPath)
+                jsonData['avatar'] = '/static/img/' + filename
                 jsonData['message'] = 'Upload-file succeed'
                 jsonData['status'] = 200
                 try:
@@ -244,7 +248,7 @@ def user_nicknameAndDescription():
         else:
             # change
             try:
-                username = session.get('usename', 'none')
+                username = session.get('username', 'none')
                 result = User.query.filter(User.username == username).first()
                 result.nickname = request.form['nickname']
                 result.description = request.form['description']
