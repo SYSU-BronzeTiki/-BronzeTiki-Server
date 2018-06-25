@@ -29,3 +29,9 @@ ORM: Object Relationship Mapping(对象关系映射)
 - A data table is abstracted to a class and one column of data is an object.
 - SQLAlchemy: flask-sqlalchemy
 - install: ``pip install flask-sqlalchemy``
+
+# Time
+
+- Use ntp to check the time
+- - ``sudo apt-get install ntp``
+- - ``/etc/init.d/ntp start``

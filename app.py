@@ -3,7 +3,7 @@
 from model import *
 from flask import request, session, redirect, render_template, url_for, jsonify, abort
 import json
-import hashlib, random, time, os
+import hashlib, random, time, os, datetime
 from werkzeug.utils import secure_filename
 
 # create data tables
@@ -263,13 +263,243 @@ def user_nicknameAndDescription():
         message = json.dumps(jsonData) # convert to json
         return message
 
-@app.route('/api/movies', methods=['POST', 'GET'])
+@app.route('/api/movies', methods=['GET'])
 def movies():
-    pass
+    if request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
 
-@app.route('/api/orders', methods=['POST', 'GET'])
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+        movies = []
+        for m in Movie.query.filter():
+            item = {}
+            item['id'] = m.movieID
+            item['name'] = m.movieName
+            item['poster'] = m.poster
+            item['rating'] = m.rating
+            item['classsfication'] = m.movieType
+            item['primaryActors'] = m.primaryActors
+            item['duration'] = m.duration
+            item['showtime'] = str(m.showtime)
+            item['description'] = m.description
+            item['status'] = m.isOnShow
+            movies.append(item)
+            # id: 电影标识
+            # poster： 海报的url
+            # rating: 评分（0-5）
+            # classsfication: 电影的分类，可以直接用string，也可以用数组
+            # primaryActors: 电影的演员
+            # duration: 电影时长，min为单位
+            # showtime: 在大陆开始上映时间（可有可无的字段）
+            # description: 电影简介
+            # status: 电影是否在上映期间
+        jsonData['data']['movies'] = movies
+        jsonData['status'] = 200
+        jsonData['message'] = 'movies succeeded'
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+@app.route('/api/movies/<int:movie_id>', methods=['GET'])
+def get_movie(movie_id):
+    if request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+        result = Movie.query.filter(Movie.movieID == movie_id).first()
+        if result:
+            jsonData['data']['id'] = result.movieID
+            jsonData['data']['name'] = result.movieName
+            jsonData['data']['poster'] = result.poster
+            jsonData['data']['rating'] = result.rating
+            jsonData['data']['classsfication'] = result.movieType
+            jsonData['data']['primaryActors'] = result.primaryActors
+            jsonData['data']['duration'] = result.duration
+            jsonData['data']['showtime'] = str(result.showtime)
+            jsonData['data']['description'] = result.description
+            jsonData['data']['status'] = result.isOnShow
+            jsonData['message'] = 'movie found'
+            jsonData['status'] = 200
+            # id: 电影标识
+            # poster： 海报的url
+            # rating: 评分（0-5）
+            # classsfication: 电影的分类，可以直接用string，也可以用数组
+            # primaryActors: 电影的演员
+            # duration: 电影时长，min为单位
+            # showtime: 在大陆开始上映时间（可有可无的字段）
+            # description: 电影简介
+            # status: 电影是否在上映期间
+        else:
+            jsonData['message'] = 'movie not found'
+            jsonData['status'] = 0
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+@app.route('/api/screens/<int:movie_id>', methods=['GET'])
+def get_screen(movie_id):
+    if request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+        result = Movie.query.filter(Movie.movieID == movie_id).first()
+        jsonData['data']['movieId'] = result.movieID
+        jsonData['data']['movieName'] = result.movieName
+        jsonData['data']['poster'] = result.poster
+        selections = {}
+        for s in Screen.query.filter(Screen.movieID == movie_id):
+            item = {}
+            item['screenId'] = s.screenID
+            item['begin'] = str(s.beginTime)
+            item['end'] = str(s.beginTime + datetime.timedelta(minutes=result.duration))
+            item['hall'] = s.movieHallID
+            item['price'] = s.ticketPrice
+            item['rest'] = s.rest
+            if str(s.beginTime.date()) in selections.keys():
+                selections[str(s.beginTime.date())].append(item)
+            else:
+                selections[str(s.beginTime.date())] = []
+                selections[str(s.beginTime.date())].append(item)
+
+        jsonData['data']['selections'] = []
+        for k, v in selections.items():
+            item = {}
+            item['date'] = k
+            item['screens'] = v
+            jsonData['data']['selections'].append(item)
+        jsonData['message'] = 'screens succeeded'
+        jsonData['status'] = 200
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+@app.route('/api/seats/<int:screen_id>', methods=['GET'])
+def get_seat(screen_id):
+    if request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+        result = Screen.query.filter(Screen.screenID == screen_id).first()
+        jsonData['data']['screenId'] = result.screenID
+        jsonData['data']['screenDate'] = str(result.beginTime)
+        jsonData['data']['screenHall'] = result.movieHallID
+        seats = [[0 for i in range(10)] for j in range(10)]
+        for s in Seat.query.filter(Seat.screenID == screen_id):
+            position = s.position[1:-1].split(',')
+            seats[int(position[0])][int(position[1])] = int(s.isAvailable)
+        jsonData['data']['seats'] = seats
+        jsonData['message'] = 'seats succeeded'
+        jsonData['status'] = 200
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+@app.route('/api/orders', methods=['GET', 'POST'])
 def orders():
-    pass
+    if request.method == 'POST':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        if 'data' in request.form:
+            jsonData['ret'] = True
+            jsonData['data'] = {}
+            form = json.loads(request.form['data']) 
+            print(str(form))
+            result = Screen.query.filter(Screen.screenID == int(form['screenId'])).first()
+            # make sure rest is enough
+            if result.rest >= len(list(form['seats'])):
+                # make sure all the seats is available
+                seats = []
+                for s in list(form['seats']):
+                    s = list(s)
+                    pos = '({}, {})'.format(s[0], s[1])
+                    seat = Seat.query.filter(Seat.position == pos).first()
+                    if not seat.isAvailable:
+                        jsonData['status'] = 0
+                        jsonData['message'] = 'seat '+pos+' is unavailable.'
+                        
+                        print(str(jsonData))           # debug the message
+                        message = json.dumps(jsonData) # convert to json
+                        return message
+                    else:
+                        seat.isAvailable = False
+                    seats.append(seat)
+                # # change
+                # db.session.commit()
+                total = result.ticketPrice*len(form['seats'])
+                # username = session.get('username', 'none')
+                username = '二狗子'
+                phone = form['phone']
+                order = Order(price=total, username=username, phone=phone)
+                db.session.add(order)
+                for s in seats:
+                    s.orderID = order.orderID
+                db.session.commit()
+
+                jsonData['data']['orderId'] = order.orderID
+                jsonData['data']['screenId'] = result.screenID
+                jsonData['data']['movieId'] = result.movieID
+                movie = Movie.query.filter(Movie.movieID == result.movieID).first()
+                jsonData['data']['movieName'] = movie.movieName
+                jsonData['data']['movieBegin'] = str(result.beginTime)
+                jsonData['data']['orderBegin'] = str(order.genTime)
+                jsonData['data']['hall'] = result.movieHallID
+                jsonData['data']['seats'] = form['seats']
+                jsonData['data']['phone'] = phone
+                jsonData['data']['total'] = total
+                jsonData['data']['isPayed'] = False
+            jsonData['status'] = 200
+            jsonData['message'] = 'seats succeed'
+        else:
+            jsonData['status'] = 0
+            jsonData['message'] = 'no data'
+        
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+    elif request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+        jsonData['data']['orders'] = []
+
+        # username = session.get('username', 'none')
+        # orders = Order.query.filter(Order.username == username)
+        # for o in orders:
+        #     order = {}
+        #     order['orderId'] = o.orderID
+        #     order['phone'] = o.phone
+        #     order['total'] = o.total
+        #     order['isPayed'] = o.isPayed
+        #     order['seats'] = []
+
+        #     seats = Seat.query.filter()
+        #     order['movieName'] = 
+        #     order['begin'] = 
+        #     order['hall'] = 
+
+        # Order.query.filter()
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
+@app.route('/api/orders/<int:order_id>', methods=['GET'])
+def get_order(order_id):
+    if request.method == 'GET':
+        return str(order_id)
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
