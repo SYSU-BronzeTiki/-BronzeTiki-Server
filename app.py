@@ -411,11 +411,14 @@ def orders():
         jsonData = {}
         jsonData['timestamp'] = time.time()
 
-        if 'data' in request.form:
+        if 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
+        elif 'data' in request.form:
             jsonData['ret'] = True
             jsonData['data'] = {}
             form = json.loads(request.form['data']) 
-            print(str(form))
+            # print(str(form))
             result = Screen.query.filter(Screen.screenID == int(form['screenId'])).first()
             # make sure rest is enough
             if result.rest >= len(list(form['seats'])):
@@ -425,42 +428,49 @@ def orders():
                     s = list(s)
                     pos = '({}, {})'.format(s[0], s[1])
                     seat = Seat.query.filter(Seat.position == pos).first()
-                    if not seat.isAvailable:
-                        jsonData['status'] = 0
-                        jsonData['message'] = 'seat '+pos+' is unavailable.'
-                        
-                        print(str(jsonData))           # debug the message
-                        message = json.dumps(jsonData) # convert to json
-                        return message
-                    else:
-                        seat.isAvailable = False
-                    seats.append(seat)
-                # # change
-                # db.session.commit()
-                total = result.ticketPrice*len(form['seats'])
-                # username = session.get('username', 'none')
-                username = '二狗子'
-                phone = form['phone']
-                order = Order(price=total, username=username, phone=phone)
-                db.session.add(order)
-                for s in seats:
-                    s.orderID = order.orderID
-                db.session.commit()
+                    if seat:
+                        if not seat.isAvailable:
+                            jsonData['status'] = 0
+                            jsonData['message'] = 'seat '+pos+' is unavailable.'
+                            
+                            print(str(jsonData))           # debug the message
+                            message = json.dumps(jsonData) # convert to json
+                            return message
+                        else:
+                            seat.isAvailable = False
+                        seats.append(seat)
+                
+                if len(seats) > 0:
+                    total = result.ticketPrice*len(form['seats'])
+                    username = session.get('username', 'none')
+                    # username = '二狗子'
+                    phone = form['phone']
+                    order = Order(price=total, username=username, phone=phone)
+                    db.session.add(order)
+                    db.session.flush()
+                    for s in seats:
+                        s.orderID = order.orderID
+                    result.rest = result.rest - len(seats)
+                    db.session.commit()
 
-                jsonData['data']['orderId'] = order.orderID
-                jsonData['data']['screenId'] = result.screenID
-                jsonData['data']['movieId'] = result.movieID
-                movie = Movie.query.filter(Movie.movieID == result.movieID).first()
-                jsonData['data']['movieName'] = movie.movieName
-                jsonData['data']['movieBegin'] = str(result.beginTime)
-                jsonData['data']['orderBegin'] = str(order.genTime)
-                jsonData['data']['hall'] = result.movieHallID
-                jsonData['data']['seats'] = form['seats']
-                jsonData['data']['phone'] = phone
-                jsonData['data']['total'] = total
-                jsonData['data']['isPayed'] = False
-            jsonData['status'] = 200
-            jsonData['message'] = 'seats succeed'
+                    jsonData['data']['orderId'] = order.orderID
+                    jsonData['data']['screenId'] = result.screenID
+                    jsonData['data']['movieId'] = result.movieID
+                    movie = Movie.query.filter(Movie.movieID == result.movieID).first()
+                    jsonData['data']['movieName'] = movie.movieName
+                    jsonData['data']['movieBegin'] = str(result.beginTime)
+                    jsonData['data']['orderBegin'] = str(order.genTime)
+                    jsonData['data']['hall'] = result.movieHallID
+                    jsonData['data']['seats'] = form['seats']
+                    jsonData['data']['phone'] = phone
+                    jsonData['data']['total'] = total
+                    jsonData['data']['isPayed'] = False
+
+                    jsonData['status'] = 200
+                    jsonData['message'] = 'seats succeed'
+                else:
+                    jsonData['status'] = 0
+                    jsonData['message'] = 'seats not available'                    
         else:
             jsonData['status'] = 0
             jsonData['message'] = 'no data'
@@ -471,35 +481,130 @@ def orders():
     elif request.method == 'GET':
         jsonData = {}
         jsonData['timestamp'] = time.time()
-        jsonData['ret'] = True
-        jsonData['data'] = {}
-        jsonData['data']['orders'] = []
 
-        # username = session.get('username', 'none')
-        # orders = Order.query.filter(Order.username == username)
-        # for o in orders:
-        #     order = {}
-        #     order['orderId'] = o.orderID
-        #     order['phone'] = o.phone
-        #     order['total'] = o.total
-        #     order['isPayed'] = o.isPayed
-        #     order['seats'] = []
+        if 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
+        else:
+            username = session.get('username', 'none')
+            # username = '二狗子'
+            orders = Order.query.filter(Order.username == username)
+            if len(orders) > 0:
+                jsonData['ret'] = True
+                jsonData['data'] = {}
+                jsonData['data']['orders'] = []
+                for o in orders:
+                    order = {}
+                    order['orderId'] = o.orderID
+                    order['phone'] = o.phone
+                    order['total'] = o.price
+                    order['isPayed'] = False if (o.payTime == None) else True
 
-        #     seats = Seat.query.filter()
-        #     order['movieName'] = 
-        #     order['begin'] = 
-        #     order['hall'] = 
-
-        # Order.query.filter()
+                    seats = Seat.query.filter(Seat.orderID == o.orderID)
+                    order['seats'] = [s.position for s in seats]
+                    screenId = seats.first().screenID
+                    screen = Screen.query.filter(Screen.screenID == screenId).first()
+                    movieId = screen.movieID
+                    movie = Movie.query.filter(Movie.movieID == movieId).first()
+                    order['movieName'] = movie.movieName
+                    order['begin'] = str(screen.beginTime)
+                    order['hall'] = str(screen.movieHallID)
+                    jsonData['data']['orders'].append(order)
+                jsonData['status'] = 200
+                jsonData['message'] = 'orders succeed'
+            else:
+                jsonData['status'] = 0
+                jsonData['message'] = 'no order'
 
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
 
-@app.route('/api/orders/<int:order_id>', methods=['GET'])
+def check_the_paypassword(username, paypassword, jsonData):
+    result = User.query.filter(User.username == username).first()
+    md5paypsw = str(hashlib.md5((paySalt + paypassword).encode()).digest())
+    if result:
+        if result.paypassword == md5paypsw:
+            jsonData['message'] = 'correct paypassword'
+            return True
+        else:
+            jsonData['message'] = 'Invalid paypassword'
+            return False
+    else:
+        jsonData['message'] = 'Invalid username'
+        return False
+
+@app.route('/api/orders/<int:order_id>', methods=['GET', 'PATCH'])
 def get_order(order_id):
     if request.method == 'GET':
-        return str(order_id)
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        jsonData['ret'] = True
+        jsonData['data'] = {}
+
+        order = Order.query.filter(Order.orderID == order_id).first()
+        if order:
+            jsonData['data']['orderId'] = order.orderID
+            jsonData['data']['phone'] = order.phone
+            jsonData['data']['total'] = order.price
+            jsonData['data']['isPayed'] = False if (order.payTime == None) else True
+            try:
+                seats = Seat.query.filter(Seat.orderID == order.orderID)
+                jsonData['data']['seats'] = [s.position for s in seats]
+                screenId = seats.first().screenID
+                screen = Screen.query.filter(Screen.screenID == screenId).first()
+                movieId = screen.movieID
+                movie = Movie.query.filter(Movie.movieID == movieId).first()
+                jsonData['data']['movieName'] = movie.movieName
+                jsonData['data']['begin'] = str(screen.beginTime)
+                jsonData['data']['hall'] = str(screen.movieHallID)
+                jsonData['status'] = 200
+                jsonData['message'] = 'orders succeed'
+            except:
+                jsonData['status'] = '0'
+                jsonData['message'] = 'order no seat'
+        else:
+            jsonData['status'] = 0
+            jsonData['message'] = 'orderId not found'
+        
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+    elif request.method == 'PATCH':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        
+        if 'username' not in session:
+        # if False:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'Offline'
+        elif 'data' in request.form:
+            jsonData['ret'] = True
+            jsonData['data'] = {}
+            form = json.loads(request.form['data'])            
+            # check and update
+            username = session.get('username', 'none')
+            # username = "二狗子"
+            if check_the_paypassword(username, form['password'], jsonData): 
+                result = Order.query.filter(Order.orderID == order_id).first()
+                if not result.payTime:
+                    result.payTime = datetime.datetime.utcnow()
+                    db.session.commit()
+                    jsonData['data']['orderId'] = order_id
+                    jsonData['message'] = 'Update succeed'
+                    jsonData['status'] = 200
+                else:
+                    jsonData['message'] = 'Already payed'
+                    jsonData['status'] = 0
+            else:
+                jsonData['status'] = 0
+        else:
+            jsonData['status'] = 0
+            jsonData['message'] = 'no data'
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
