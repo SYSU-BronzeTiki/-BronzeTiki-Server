@@ -1,17 +1,13 @@
 #encoding: utf-8
-
+from sqlalchemy import text
 from model import *
 from flask import request, session, redirect, render_template, url_for, jsonify, abort
 import json
 import hashlib, random, time, os, datetime
 from werkzeug.utils import secure_filename
-from douban_info_getter import get_movie_detail
 
 # create data tables
-print ("abc")
 db.create_all()
-print ("all init")
-
 
 def register_a_user(username, password, jsonData):
     result = User.query.filter(User.username == username).all()
@@ -31,6 +27,69 @@ def register_a_user(username, password, jsonData):
     else:
         jsonData['message'] = 'Username existed'
         return False
+
+def fuzzy_search(searchKey):
+    """
+    简化的模糊搜索,根据搜索关键字返回搜索结果列表
+    :param searchKey:
+    :return: 按照匹配程度从高到低排列的搜素结果
+    """
+    movie_list = {}
+    for word in searchKey:
+        # 看是否要修改
+        my_sql = "SELECT * FROM movie WHERE movieName like \'%{0}%\';".format(word)
+        print(my_sql)
+        result = db.engine.execute(text(my_sql))
+        for row in result:
+            matchName = row[0]
+            if matchName in movie_list:
+                movie_list[matchName] += 1
+            else:
+                movie_list[matchName] = 1
+    for k in movie_list:
+        print((k, movie_list[k]))
+    total = len(movie_list)
+    sortByVal = sorted(movie_list.items(), key = lambda kv: kv[1])
+    sortByVal.reverse()
+    # print(sortByVal)
+    searchResult = []
+    for i in range(min(total, 10)):
+        target_id = sortByVal[i][0]
+        result = Movie.query.filter(Movie.movieID == target_id).first()
+        # 原地修改会影响上一次的值,每次都应该新建立一个dict
+        data = {}
+        data['id'] = result.movieID
+        data['name'] = result.movieName
+        data['poster'] = result.poster
+        data['rating'] = result.rating
+        data['classfication'] = result.movieType
+        data['primaryActors'] = result.primaryActors
+        data['duration'] = result.duration
+        data['showtime'] = str(result.showtime)
+        data['description'] = result.description
+        searchResult.append(data)
+    return searchResult
+
+@app.route('/api/movies/', methods=['GET'])
+def get_search_result():
+    searchKey = request.args.get('query')
+    print(searchKey)
+    jsonData = {'timestamp': time.time()}
+    data = []
+    if searchKey != None:
+        data = fuzzy_search(searchKey)
+    if len(data) != 0:
+        jsonData['ret'] = True
+        jsonData['data'] = data
+        jsonData['status'] = 200
+        jsonData['message'] = "search success!"
+    else:
+        jsonData['message'] = "no result"
+        jsonData['status'] = 0
+
+    print(str(jsonData)) # for debug
+    message = json.dumps(jsonData)
+    return message
 
 @app.route('/api/users/register', methods=['POST'])
 def user_register():
@@ -147,7 +206,6 @@ def state():
     message = json.dumps(jsonData) # convert to json
     return message
 
-
 def change_the_password(username, oldpassword, password, jsonData):
     result = User.query.filter(User.username == username).first()
     md5oldpsw = str(hashlib.md5((salt + oldpassword).encode()).digest())
@@ -168,7 +226,6 @@ def change_the_password(username, oldpassword, password, jsonData):
     else:
         jsonData['message'] = 'Invalid username'
         return False
-
 
 @app.route('/api/users/password', methods=['PATCH'])
 def user_password():
@@ -195,7 +252,6 @@ def user_password():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-
 
 @app.route('/api/users/avatar', methods=['POST'])
 def user_avatar():
@@ -235,7 +291,6 @@ def user_avatar():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-
 
 @app.route('/api/users/nicknameAndDescription', methods=['PATCH'])
 def user_nicknameAndDescription():
@@ -347,7 +402,6 @@ def get_movie(movie_id):
         message = json.dumps(jsonData) # convert to json
         return message
 
-
 @app.route('/api/screens/<int:movie_id>', methods=['GET'])
 def get_screen(movie_id):
     if request.method == 'GET':
@@ -388,7 +442,6 @@ def get_screen(movie_id):
         message = json.dumps(jsonData) # convert to json
         return message
 
-
 @app.route('/api/seats/<int:screen_id>', methods=['GET'])
 def get_seat(screen_id):
     if request.method == 'GET':
@@ -412,7 +465,6 @@ def get_seat(screen_id):
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-
 
 @app.route('/api/orders', methods=['GET', 'POST'])
 def orders():
