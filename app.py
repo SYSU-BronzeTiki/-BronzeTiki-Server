@@ -5,9 +5,13 @@ from flask import request, session, redirect, render_template, url_for, jsonify,
 import json
 import hashlib, random, time, os, datetime
 from werkzeug.utils import secure_filename
+from douban_info_getter import get_movie_detail
 
 # create data tables
+print ("abc")
 db.create_all()
+print ("all init")
+
 
 def register_a_user(username, password, jsonData):
     result = User.query.filter(User.username == username).all()
@@ -123,7 +127,6 @@ def user_login():
         message = json.dumps(jsonData) # convert to json
         return message
 
-
 @app.route('/api/state', methods=['GET', 'POST'])
 def state():
     jsonData = {}
@@ -143,6 +146,7 @@ def state():
     print(str(jsonData))           # debug the message
     message = json.dumps(jsonData) # convert to json
     return message
+
 
 def change_the_password(username, oldpassword, password, jsonData):
     result = User.query.filter(User.username == username).first()
@@ -164,6 +168,7 @@ def change_the_password(username, oldpassword, password, jsonData):
     else:
         jsonData['message'] = 'Invalid username'
         return False
+
 
 @app.route('/api/users/password', methods=['PATCH'])
 def user_password():
@@ -190,6 +195,7 @@ def user_password():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
+
 
 @app.route('/api/users/avatar', methods=['POST'])
 def user_avator():
@@ -229,6 +235,7 @@ def user_avator():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
+
 
 @app.route('/api/users/nicknameAndDescription', methods=['PATCH'])
 def user_nicknameAndDescription():
@@ -276,7 +283,7 @@ def movies():
             item = {}
             item['id'] = m.movieID
             item['name'] = m.movieName
-            item['poster'] = m.poster
+            item['poster'] = m.poter
             item['rating'] = m.rating
             item['classsfication'] = m.movieType
             item['primaryActors'] = m.primaryActors
@@ -333,13 +340,14 @@ def get_movie(movie_id):
             # showtime: 在大陆开始上映时间（可有可无的字段）
             # description: 电影简介
             # status: 电影是否在上映期间
-        else:
+        elif():
             jsonData['message'] = 'movie not found'
             jsonData['status'] = 0
 
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
+
 
 @app.route('/api/screens/<int:movie_id>', methods=['GET'])
 def get_screen(movie_id):
@@ -381,6 +389,7 @@ def get_screen(movie_id):
         message = json.dumps(jsonData) # convert to json
         return message
 
+
 @app.route('/api/seats/<int:screen_id>', methods=['GET'])
 def get_seat(screen_id):
     if request.method == 'GET':
@@ -404,6 +413,7 @@ def get_seat(screen_id):
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
+
 
 @app.route('/api/orders', methods=['GET', 'POST'])
 def orders():
@@ -520,6 +530,7 @@ def orders():
         message = json.dumps(jsonData) # convert to json
         return message
 
+
 def check_the_paypassword(username, paypassword, jsonData):
     result = User.query.filter(User.username == username).first()
     md5paypsw = str(hashlib.md5((paySalt + paypassword).encode()).digest())
@@ -533,6 +544,7 @@ def check_the_paypassword(username, paypassword, jsonData):
     else:
         jsonData['message'] = 'Invalid username'
         return False
+
 
 @app.route('/api/orders/<int:order_id>', methods=['GET', 'PATCH'])
 def get_order(order_id):
@@ -606,6 +618,7 @@ def get_order(order_id):
         message = json.dumps(jsonData) # convert to json
         return message
 
+
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
 def front_end(path):
@@ -616,6 +629,9 @@ def front_end(path):
     print([x for x in paths])
     return render_template("index.html")
 
+
 if __name__ == '__main__':
+    print("abc\n")
     debug=True
-    app.run(host='0.0.0.0')
+    app.run()
+    # app.run(host='0.0.0.0')

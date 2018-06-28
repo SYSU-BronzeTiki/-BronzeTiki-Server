@@ -56,13 +56,14 @@ class User(db.Model):
 #     showtime date,
 #     isOnShow boolean,
 #     primary key (movieID)
-# )
+# );
 # alter table movie modify column poster varchar(256);
 # alter table movie modify column duration int;
 # insert into movie (movieName, poster, primaryActors, duration, movieType, description, rating) values ("深海越狱","https://p0.meituan.net/128.180/movie/200526fd0facc141caeef984314f7ef8328722.jpg","深海越狱演员",104,"剧情, 动作, 犯罪", "深海越狱介绍",5);
 # insert into movie (movieName, poster, primaryActors, duration, movieType, description, rating) values ("超时空同居","https://p0.meituan.net/148.208/movie/f193e43ca706aa6bc6a26d6f53f0115a5315542.jpg","苏伦(导演) / 雷佳音 / 佟丽娅 / 张衣",101,"喜剧, 爱情, 奇幻","来自2018年谷小焦（佟丽娅 饰）与1999年陆鸣（雷佳音 饰），两人时空重叠意外住在同一个房间。从互相嫌弃到试图“共谋大业”，阴差阳错发生了一系列好笑的事情。乐在其中的两人并不知道操控这一切的神秘人竟是想要去2037年“投机取巧”的2018年的……",4);
 # alter table movie add column showtime date;
 # alter table movie add column isOnShow boolean;
+
 class Movie(db.Model):
     __tablename__ = 'movie'
     movieID = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -103,6 +104,7 @@ class Comment(db.Model):
         "mysql_charset" : "utf8"
     }
 
+
 # Data table MovieHall
 # create table movieHall(
 #     movieHallID int,
@@ -116,6 +118,7 @@ class MovieHall(db.Model):
         "mysql_charset" : "utf8"
     }
 
+
 # Data table Screen
 # create table screen (
 #     screenID int,
@@ -125,7 +128,7 @@ class MovieHall(db.Model):
 #     movieID int,
 #     rest int,
 #     primary key (screenID),
-#     foreign key (movieHallID) references movieHall(movieHalllID),
+#     foreign key (movieHallID) references movieHall(movieHallID),
 #     foreign key (movieID) references movie(movieID)
 # )
 # alter table screen modify column ticketPrice float;
@@ -142,6 +145,7 @@ class Screen(db.Model):
     __table_args__ = {
         "mysql_charset" : "utf8"
     }
+
 
 # Data table Seat
 # create table seat (
@@ -167,8 +171,9 @@ class Seat(db.Model):
     position = db.Column(db.String(50))
     orderID = db.Column(db.Integer, db.ForeignKey('movieorder.orderID'))
     __table_args__ = {
-        "mysql_charset" : "utf8"
+        "mysql_charset": "utf8"
     }
+
 
 # Data table MovieOrder 
 # create table movieorder (
@@ -177,15 +182,9 @@ class Seat(db.Model):
 #     payTime datetime,
 #     price int,
 #     username varchar(50),
-#     # movieHallID int,
-#     # movieID int,
-#     # seatID int,
 #     phone varchar(32),
 #     primary key (orderID),
-#     foreign key (username) references user(username),
-#     # foreign key (movieHallID) references movieHall(movieHallID),
-#     # foreign key (movieID) references movie(movieID),
-#     foreign key (seatID) references seat(seatID)
+#     foreign key (username) references user(username)
 # )
 # alter table movieorder drop column seatID;???
 # alter table movieorder add column phone varchar(32);
@@ -200,6 +199,6 @@ class Order(db.Model):
     # seatID = db.Column(db.Integer, db.ForeignKey('seat.seatID'))
     phone = db.Column(db.String(32))
     __table_args__ = {
-        "mysql_charset" : "utf8"
+        "mysql_charset": "utf8"
     }
 
