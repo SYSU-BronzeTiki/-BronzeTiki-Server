@@ -303,6 +303,70 @@ def movies():
         message = json.dumps(jsonData) # convert to json
         return message
 
+def fuzzy_search(searchKey):
+    """
+    简化的模糊搜索,根据搜索关键字返回搜索结果列表
+    :param searchKey:
+    :return: 按照匹配程度从高到低排列的搜素结果
+    """
+    movie_list = {}
+    for word in searchKey:
+        # 看是否要修改
+        my_sql = "SELECT * FROM movie WHERE movieName like \'%{0}%\';".format(word)
+        print(my_sql)
+        result = db.engine.execute(text(my_sql))
+        for row in result:
+            matchName = row[0]
+            if matchName in movie_list:
+                movie_list[matchName] += 1
+            else:
+                movie_list[matchName] = 1
+    for k in movie_list:
+        # for debug
+        print((k, movie_list[k]))
+    total = len(movie_list)
+    sortByVal = sorted(movie_list.items(), key = lambda kv: kv[1])
+    sortByVal.reverse()
+    # print(sortByVal)
+    searchResult = []
+    for i in range(min(total, 10)):
+        target_id = sortByVal[i][0]
+        result = Movie.query.filter(Movie.movieID == target_id).first()
+        # 原地修改会影响上一次的值,每次都应该新建立一个dict
+        data = {}
+        data['id'] = result.movieID
+        data['name'] = result.movieName
+        data['poster'] = result.poster
+        data['rating'] = result.rating
+        data['classfication'] = result.movieType
+        data['primaryActors'] = result.primaryActors
+        data['duration'] = result.duration
+        data['showtime'] = str(result.showtime)
+        data['description'] = result.description
+        searchResult.append(data)
+    return searchResult
+
+@app.route('/api/movies/', methods=['GET'])
+def get_search_result():
+    searchKey = request.args.get('query')
+    print(searchKey)
+    jsonData = {'timestamp': time.time()}
+    data = []
+    if searchKey != None:
+        data = fuzzy_search(searchKey)
+    if len(data) != 0:
+        jsonData['ret'] = True
+        jsonData['movies'] = data
+        jsonData['status'] = 200
+        jsonData['message'] = "search success!"
+    else:
+        jsonData['message'] = "no result"
+        jsonData['status'] = 0
+
+    print(str(jsonData)) # for debug
+    message = json.dumps(jsonData)
+    return message
+
 @app.route('/api/movies/<int:movie_id>', methods=['GET'])
 def get_movie(movie_id):
     if request.method == 'GET':
