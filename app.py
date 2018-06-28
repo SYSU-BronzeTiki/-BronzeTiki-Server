@@ -278,7 +278,7 @@ def movies():
             item['name'] = m.movieName
             item['poster'] = m.poster
             item['rating'] = m.rating
-            item['classsfication'] = m.movieType
+            item['classification'] = m.movieType
             item['primaryActors'] = m.primaryActors
             item['duration'] = m.duration
             item['showtime'] = str(m.showtime)
@@ -288,7 +288,7 @@ def movies():
             # id: 电影标识
             # poster： 海报的url
             # rating: 评分（0-5）
-            # classsfication: 电影的分类，可以直接用string，也可以用数组
+            # classification: 电影的分类，可以直接用string，也可以用数组
             # primaryActors: 电影的演员
             # duration: 电影时长，min为单位
             # showtime: 在大陆开始上映时间（可有可无的字段）
@@ -316,7 +316,7 @@ def get_movie(movie_id):
             jsonData['data']['name'] = result.movieName
             jsonData['data']['poster'] = result.poster
             jsonData['data']['rating'] = result.rating
-            jsonData['data']['classsfication'] = result.movieType
+            jsonData['data']['classification'] = result.movieType
             jsonData['data']['primaryActors'] = result.primaryActors
             jsonData['data']['duration'] = result.duration
             jsonData['data']['showtime'] = str(result.showtime)
@@ -327,7 +327,7 @@ def get_movie(movie_id):
             # id: 电影标识
             # poster： 海报的url
             # rating: 评分（0-5）
-            # classsfication: 电影的分类，可以直接用string，也可以用数组
+            # classification: 电影的分类，可以直接用string，也可以用数组
             # primaryActors: 电影的演员
             # duration: 电影时长，min为单位
             # showtime: 在大陆开始上映时间（可有可无的字段）
@@ -637,7 +637,7 @@ def my_movies():
                     item['name'] = m.movieName
                     item['poster'] = m.poster
                     item['rating'] = m.rating
-                    item['classsfication'] = m.movieType
+                    item['classification'] = m.movieType
                     item['primaryActors'] = m.primaryActors
                     item['duration'] = m.duration
                     item['showtime'] = str(m.showtime)
