@@ -489,7 +489,7 @@ def orders():
             username = session.get('username', 'none')
             # username = '二狗子'
             orders = Order.query.filter(Order.username == username)
-            if len(orders) > 0:
+            if orders:
                 jsonData['ret'] = True
                 jsonData['data'] = {}
                 jsonData['data']['orders'] = []
@@ -605,6 +605,55 @@ def get_order(order_id):
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
+
+@app.route('/api/myMovies', methods=['GET'])
+def my_movies():
+    if request.method == 'GET':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        if 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
+        else:
+            username = session.get('username', 'none')
+            # username = '二狗子'
+            orders = Order.query.filter(Order.username == username)
+            if orders:
+                jsonData['ret'] = True
+                jsonData['data'] = {}
+                jsonData['data']['movies'] = []
+                screenIds = set()
+                for o in orders:
+                    if o.payTime:
+                        seat = Seat.query.filter(Seat.orderID == o.orderID).first()
+                        if seat:
+                            screenIds.add(seat.screenID)
+                for sid in screenIds:
+                    screen = Screen.query.filter(Screen.screenID == sid).first()
+                    m = Movie.query.filter(Movie.movieID == screen.movieID).first()
+                    item = {}
+                    item['id'] = m.movieID
+                    item['name'] = m.movieName
+                    item['poster'] = m.poster
+                    item['rating'] = m.rating
+                    item['classsfication'] = m.movieType
+                    item['primaryActors'] = m.primaryActors
+                    item['duration'] = m.duration
+                    item['showtime'] = str(m.showtime)
+                    item['description'] = m.description
+                    item['status'] = m.isOnShow
+                    jsonData['data']['movies'].append(item)
+                jsonData['status'] = 200
+                jsonData['message'] = 'orders succeed'
+            else:
+                jsonData['status'] = 0
+                jsonData['message'] = 'no order'
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
