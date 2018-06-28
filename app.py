@@ -1,5 +1,6 @@
 #encoding: utf-8
 
+from sqlalchemy import text
 from model import *
 from flask import request, session, redirect, render_template, url_for, jsonify, abort
 import json
