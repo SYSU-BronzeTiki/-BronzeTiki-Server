@@ -58,7 +58,7 @@ def login_the_user(username, password, jsonData):
         if result.password == md5psw:
             try:
                 result = User.query.filter(User.username == username).first()
-                jsonData['avator'] = result.avator
+                jsonData['avatar'] = result.avator
                 jsonData['nickname'] = result.nickname
                 jsonData['description'] = result.description
                 jsonData['money'] = result.money
@@ -91,7 +91,7 @@ def user_login():
             # validate and login
             if login_the_user(request.form['username'], request.form['password'], jsonData):
                 session['username'] = request.form['username']
-                session['avator'] = jsonData['avator']
+                session['avatar'] = jsonData['avatar']
                 session['nickname'] = jsonData['nickname']
                 session['description'] = jsonData['description']
                 session['money'] = jsonData['money']
@@ -134,7 +134,7 @@ def state():
     elif 'username' in session:
         # jsonData['uid'] = jsonData['uid']
         jsonData['username'] = session.get('username', 'none')
-        jsonData['avator'] = session.get('avator', 'none')
+        jsonData['avatar'] = session.get('avatar', 'none')
         jsonData['nickname'] = session.get('nickname', 'none')
         jsonData['description'] = session.get('description', 'none')
         jsonData['money'] = session.get('money', 'none')
@@ -192,7 +192,7 @@ def user_password():
         return message
 
 @app.route('/api/users/avatar', methods=['POST'])
-def user_avator():
+def user_avatar():
     if request.method == 'POST':
         jsonData = {}
         jsonData['timestamp'] = time.time()
