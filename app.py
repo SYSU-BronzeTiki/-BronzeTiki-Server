@@ -304,7 +304,6 @@ def movies():
         jsonData['data']['movies'] = movies
         jsonData['status'] = 200
         jsonData['message'] = 'movies succeeded'
-
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
@@ -340,7 +339,7 @@ def get_movie(movie_id):
             # showtime: 在大陆开始上映时间（可有可无的字段）
             # description: 电影简介
             # status: 电影是否在上映期间
-        elif():
+        else:
             jsonData['message'] = 'movie not found'
             jsonData['status'] = 0
 
