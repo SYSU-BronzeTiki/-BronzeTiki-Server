@@ -47,6 +47,7 @@ def fuzzy_search(searchKey):
             else:
                 movie_list[matchName] = 1
     for k in movie_list:
+        # for debug
         print((k, movie_list[k]))
     total = len(movie_list)
     sortByVal = sorted(movie_list.items(), key = lambda kv: kv[1])
@@ -80,7 +81,7 @@ def get_search_result():
         data = fuzzy_search(searchKey)
     if len(data) != 0:
         jsonData['ret'] = True
-        jsonData['data'] = data
+        jsonData['movies'] = data
         jsonData['status'] = 200
         jsonData['message'] = "search success!"
     else:

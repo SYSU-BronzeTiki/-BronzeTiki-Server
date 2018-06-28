@@ -138,52 +138,8 @@ def init_movie_table():
     print("fail to get in-theater movies")
     return False
 
-
-# def fuzzy_search(searchKey):
-#     """
-#     简化的模糊搜索,根据搜索关键字返回搜索结果列表
-#     :param searchKey:
-#     :return: 按照匹配程度从高到低排列的搜素结果
-#     """
-#     movie_list = {}
-#     for word in searchKey:
-#         # 看是否要修改
-#         my_sql = "SELECT * FROM movie WHERE movieName like \'%{0}%\';".format(word)
-#         print(my_sql)
-#         result = db.engine.execute(text(my_sql))
-#         for row in result:
-#             matchName = row[0]
-#             if matchName in movie_list:
-#                 movie_list[matchName] += 1
-#             else:
-#                 movie_list[matchName] = 1
-#     for k in movie_list:
-#         print((k, movie_list[k]))
-#     total = len(movie_list)
-#     sortByVal = sorted(movie_list.items(), key = lambda kv: kv[1])
-#     sortByVal.reverse()
-#     # print(sortByVal)
-#     searchResult = []
-#     for i in range(min(total, 10)):
-#         target_id = sortByVal[i][0]
-#         result = Movie.query.filter(Movie.movieID == target_id).first()
-#         # 原地修改会影响上一次的值,每次都应该新建立一个dict
-#         data = {}
-#         data['id'] = result.movieID
-#         data['name'] = result.movieName
-#         data['poster'] = result.poster
-#         data['rating'] = result.rating
-#         data['classfication'] = result.movieType
-#         data['primaryActors'] = result.primaryActors
-#         data['duration'] = result.duration
-#         data['showtime'] = str(result.showtime)
-#         data['description'] = result.description
-#         searchResult.append(data)
-#     return searchResult
-
-
 if __name__ == "__main__":
     # test the moudule function
     init_movie_table()
-    fuzzy_search("阿飞")
-# pprint.pprint(getMovieDetail("超时空同居"))
+    # fuzzy_search("阿飞")
+    # pprint.pprint(getMovieDetail("超时空同居"))
