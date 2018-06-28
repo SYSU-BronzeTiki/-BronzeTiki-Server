@@ -5,6 +5,7 @@ from flask import request, session, redirect, render_template, url_for, jsonify,
 import json
 import hashlib, random, time, os, datetime
 from werkzeug.utils import secure_filename
+import sched, threading
 
 # create data tables
 db.create_all()
@@ -405,6 +406,24 @@ def get_seat(screen_id):
         message = json.dumps(jsonData) # convert to json
         return message
 
+# @app.route('/api/invalid')
+# def invalid():
+#     # s = sched.scheduler(time.time, time.sleep)
+#     # s.enter(5, 1, invalidOrderWorker, ('hello', time.time()))
+#     # s.run()
+#     threading.Timer(1, invalidOrderWorker, ('hello', time.time())).start()
+#     return "en"
+
+def invalidOrderWorker(orderId):
+    order = Order.query.filter(Order.orderID == orderId).first()
+    if not order.payTime:
+        order.payTime = "1000-01-01 00:00:00"
+        seats = Seat.query.filter(Seat.orderID == orderId)
+        for s in seats:
+            s.isAvailable = True
+            s.orderID = None
+        db.session.commit()
+
 @app.route('/api/orders', methods=['GET', 'POST'])
 def orders():
     if request.method == 'POST':
@@ -426,7 +445,7 @@ def orders():
                 seats = []
                 for s in list(form['seats']):
                     s = list(s)
-                    pos = '({}, {})'.format(s[0], s[1])
+                    pos = '[{}, {}]'.format(s[0], s[1])
                     seat = Seat.query.filter(Seat.position == pos).first()
                     if seat:
                         if not seat.isAvailable:
@@ -465,6 +484,10 @@ def orders():
                     jsonData['data']['phone'] = phone
                     jsonData['data']['total'] = total
                     jsonData['data']['isPayed'] = False
+                    jsonData['data']['isValid'] = True
+
+                    # invalidate this order after 300s
+                    threading.Timer(300, invalidOrderWorker, (order.orderID)).start()
 
                     jsonData['status'] = 200
                     jsonData['message'] = 'seats succeed'
@@ -547,7 +570,7 @@ def get_order(order_id):
             jsonData['data']['orderId'] = order.orderID
             jsonData['data']['phone'] = order.phone
             jsonData['data']['total'] = order.price
-            jsonData['data']['isPayed'] = False if (order.payTime == None) else True
+            jsonData['data']['isPayed'] = False if (order.payTime == None or str(order.payTime) == "1000-01-01 00:00:00") else True
             try:
                 seats = Seat.query.filter(Seat.orderID == order.orderID)
                 jsonData['data']['seats'] = [s.position for s in seats]
@@ -557,6 +580,9 @@ def get_order(order_id):
                 movie = Movie.query.filter(Movie.movieID == movieId).first()
                 jsonData['data']['movieName'] = movie.movieName
                 jsonData['data']['begin'] = str(screen.beginTime)
+                jsonData['data']['orderBegin'] = str(order.genTime)
+                jsonData['data']['payTime'] = str(order.payTime)
+                jsonData['data']['isValid'] = False if (str(order.payTime) == "1000-01-01 00:00:00") else True
                 jsonData['data']['hall'] = str(screen.movieHallID)
                 jsonData['status'] = 200
                 jsonData['message'] = 'orders succeed'
@@ -587,15 +613,18 @@ def get_order(order_id):
             # username = "二狗子"
             if check_the_paypassword(username, form['password'], jsonData): 
                 result = Order.query.filter(Order.orderID == order_id).first()
-                if not result.payTime:
+                if str(result.payTime) == "1000-01-01 00:00:00":
+                    jsonData['message'] = 'Invalid order'
+                    jsonData['status'] = 0
+                elif result.payTime:
+                    jsonData['message'] = 'Already payed'
+                    jsonData['status'] = 0
+                else:
                     result.payTime = datetime.datetime.utcnow()
                     db.session.commit()
                     jsonData['data']['orderId'] = order_id
                     jsonData['message'] = 'Update succeed'
                     jsonData['status'] = 200
-                else:
-                    jsonData['message'] = 'Already payed'
-                    jsonData['status'] = 0
             else:
                 jsonData['status'] = 0
         else:
