@@ -394,7 +394,7 @@ def fuzzy_search(searchKey):
         searchResult.append(data)
     return searchResult
 
-@app.route('/api/movies/', methods=['GET'])
+@app.route('/api/movies/query', methods=['GET'])
 def get_search_result():
     searchKey = request.args.get('query')
     print(searchKey)
