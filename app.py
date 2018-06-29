@@ -274,19 +274,19 @@ def change_the_paypassword(username, oldpassword, password, jsonData):
             try:
                 result.paypassword = md5psw
                 db.session.commit()
-                jsonData['message'] = 'Change paypassword succeeded'
+                jsonData['message'] = 'Change payPassword succeeded'
                 return True
             except:
-                jsonData['message'] = 'Change paypassword failed'
+                jsonData['message'] = 'Change payPassword failed'
                 return False
         else:
-            jsonData['message'] = 'Invalid old paypassword'
+            jsonData['message'] = 'Invalid old payPassword'
             return False
     else:
         jsonData['message'] = 'Invalid username'
         return False
 
-@app.route('/api/users/paypassword', methods=['PATCH'])
+@app.route('/api/users/payPassword', methods=['PATCH'])
 def paypassword():
     if request.method == 'PATCH':
         jsonData = {}
@@ -295,15 +295,15 @@ def paypassword():
         if 'username' not in request.form:
             jsonData['status'] = '0'
             jsonData['message'] = 'No username'
-        elif 'oldPaypassword' not in request.form:
+        elif 'oldPayPassword' not in request.form:
             jsonData['status'] = '0'
-            jsonData['message'] = 'No old paypassword'
-        elif 'newPaypassword' not in request.form:
+            jsonData['message'] = 'No old payPassword'
+        elif 'newPayPassword' not in request.form:
             jsonData['status'] = '0'
-            jsonData['message'] = 'No new paypassword'
+            jsonData['message'] = 'No new payPassword'
         else:
             # validate and change
-            if change_the_paypassword(request.form['username'], request.form['oldPaypassword'], request.form['newPaypassword'], jsonData):
+            if change_the_paypassword(request.form['username'], request.form['oldPayPassword'], request.form['newPayPassword'], jsonData):
                 jsonData['status'] = 200
             else:
                 jsonData['status'] = 0
@@ -795,6 +795,50 @@ def my_movies():
         message = json.dumps(jsonData) # convert to json
         return message
         
+@app.route('/api/comments', methods=['POST'])
+def comment():
+    # 用户名，头像，评论内容，评论时间
+    if request.method == 'POST':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+
+        if 'username' not in session:
+            jsonData['status'] = 0
+            jsonData['message'] = 'Offline'
+        elif 'data' in request.form:
+            jsonData['ret'] = True
+            jsonData['data'] = {}
+            form = json.loads(request.form['data'])
+            user = User.query.filter(User.username == form['username']).first()
+            if user:
+                jsonData['data']['username'] = user.username
+                jsonData['data']['avatar'] = user.avator
+                movie = Movie.query.filter(Movie.movieID == form['movieID']).first()
+                if movie:
+                    jsonData['data']['movieName'] = movie.movieName
+                    comment = Comment(rating=form['rating'], description=form['description'], username=user.username, movieID=movie.movieID)
+                    db.session.add(comment)
+                    db.session.commit()
+                    jsonData['data']['commentID'] = comment.commentID
+                    jsonData['data']['description'] = comment.description
+                    jsonData['data']['time'] = comment.time
+                    jsonData['data']['rating'] = comment.rating
+                    jsonData['status'] = 200
+                    jsonData['message'] = 'comments succeed'
+                else:
+                    jsonData['status'] = 0
+                    jsonData['message'] = 'movie not found'
+            else:
+                jsonData['status'] = 0
+                jsonData['message'] = 'user not found'
+        else:
+            jsonData['status'] = 0
+            jsonData['message'] = 'no data'
+        
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
