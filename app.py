@@ -265,6 +265,53 @@ def user_nicknameAndDescription():
         message = json.dumps(jsonData) # convert to json
         return message
 
+def change_the_paypassword(username, oldpassword, password, jsonData):
+    result = User.query.filter(User.username == username).first()
+    md5oldpsw = str(hashlib.md5((paySalt + oldpassword).encode()).digest())
+    md5psw = str(hashlib.md5((paySalt + password).encode()).digest())
+    if result:
+        if result.paypassword == md5oldpsw:
+            try:
+                result.paypassword = md5psw
+                db.session.commit()
+                jsonData['message'] = 'Change paypassword succeeded'
+                return True
+            except:
+                jsonData['message'] = 'Change paypassword failed'
+                return False
+        else:
+            jsonData['message'] = 'Invalid old paypassword'
+            return False
+    else:
+        jsonData['message'] = 'Invalid username'
+        return False
+
+@app.route('/api/users/paypassword', methods=['PATCH'])
+def paypassword():
+    if request.method == 'PATCH':
+        jsonData = {}
+        jsonData['timestamp'] = time.time()
+        
+        if 'username' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No username'
+        elif 'oldPaypassword' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No old paypassword'
+        elif 'newPaypassword' not in request.form:
+            jsonData['status'] = '0'
+            jsonData['message'] = 'No new paypassword'
+        else:
+            # validate and change
+            if change_the_paypassword(request.form['username'], request.form['oldPaypassword'], request.form['newPaypassword'], jsonData):
+                jsonData['status'] = 200
+            else:
+                jsonData['status'] = 0
+
+        print(str(jsonData))           # debug the message
+        message = json.dumps(jsonData) # convert to json
+        return message
+
 @app.route('/api/movies', methods=['GET'])
 def movies():
     if request.method == 'GET':
@@ -747,7 +794,7 @@ def my_movies():
         print(str(jsonData))           # debug the message
         message = json.dumps(jsonData) # convert to json
         return message
-
+        
 
 @app.route('/', defaults={'path': ''})  # root dir
 @app.route('/<path:path>')              # any path
