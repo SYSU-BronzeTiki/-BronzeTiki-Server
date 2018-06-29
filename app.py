@@ -312,6 +312,7 @@ def paypassword():
         message = json.dumps(jsonData) # convert to json
         return message
 
+@app.route('/api/movies/', methods=['GET'])
 @app.route('/api/movies', methods=['GET'])
 def movies():
     if request.method == 'GET':
@@ -394,7 +395,7 @@ def fuzzy_search(searchKey):
         searchResult.append(data)
     return searchResult
 
-@app.route('/api/movies/query', methods=['GET'])
+@app.route('/api/search', methods=['GET'])
 def get_search_result():
     searchKey = request.args.get('query')
     print(searchKey)
@@ -509,7 +510,7 @@ def get_seat(screen_id):
         seats = [[0 for i in range(10)] for j in range(10)]
         for s in Seat.query.filter(Seat.screenID == screen_id):
             position = s.position[1:-1].split(',')
-            seats[int(position[0])][int(position[1])] = int(s.isAvailable)
+            seats[int(position[0])][int(position[1])] = int(s.isAvailable != True)
         jsonData['data']['seats'] = seats
         jsonData['message'] = 'seats succeeded'
         jsonData['status'] = 200
@@ -655,13 +656,17 @@ def orders():
         message = json.dumps(jsonData) # convert to json
         return message
 
-def check_the_paypassword(username, paypassword, jsonData):
+def check_the_paypassword(username, paypassword, price, jsonData):
     result = User.query.filter(User.username == username).first()
     md5paypsw = str(hashlib.md5((paySalt + paypassword).encode()).digest())
     if result:
         if result.paypassword == md5paypsw:
-            jsonData['message'] = 'correct paypassword'
-            return True
+            if result.money >= price:
+                result.money = result.money - price
+                return True
+            else:
+                jsonData['message'] = 'Money not enough'
+                return False
         else:
             jsonData['message'] = 'Invalid paypassword'
             return False
@@ -723,22 +728,22 @@ def get_order(order_id):
             # check and update
             username = session.get('username', 'none')
             # username = "二狗子"
-            if check_the_paypassword(username, form['password'], jsonData): 
-                result = Order.query.filter(Order.orderID == order_id).first()
-                if str(result.payTime) == "1000-01-01 00:00:00":
-                    jsonData['message'] = 'Invalid order'
-                    jsonData['status'] = 0
-                elif result.payTime:
-                    jsonData['message'] = 'Already payed'
-                    jsonData['status'] = 0
-                else:
+            result = Order.query.filter(Order.orderID == order_id).first()
+            if str(result.payTime) == "1000-01-01 00:00:00":
+                jsonData['message'] = 'Invalid order'
+                jsonData['status'] = 0
+            elif result.payTime:
+                jsonData['message'] = 'Already payed'
+                jsonData['status'] = 0
+            else:
+                if check_the_paypassword(username, form['password'], result.price, jsonData):
                     result.payTime = datetime.datetime.utcnow()
                     db.session.commit()
                     jsonData['data']['orderId'] = order_id
                     jsonData['message'] = 'Update succeed'
                     jsonData['status'] = 200
-            else:
-                jsonData['status'] = 0
+                else:
+                    jsonData['status'] = 0
         else:
             jsonData['status'] = 0
             jsonData['message'] = 'no data'
@@ -816,11 +821,11 @@ def comment():
                 movie = Movie.query.filter(Movie.movieID == form['movieID']).first()
                 if movie:
                     jsonData['data']['movieName'] = movie.movieName
-                    comment = Comment(rating=form['rating'], description=form['description'], username=user.username, movieID=movie.movieID)
+                    comment = Comment(rating=form['rating'], description=form['comment'], username=user.username, movieID=movie.movieID)
                     db.session.add(comment)
                     db.session.commit()
                     jsonData['data']['commentID'] = comment.commentID
-                    jsonData['data']['description'] = comment.description
+                    jsonData['data']['comment'] = comment.description
                     jsonData['data']['time'] = comment.time
                     jsonData['data']['rating'] = comment.rating
                     jsonData['status'] = 200
