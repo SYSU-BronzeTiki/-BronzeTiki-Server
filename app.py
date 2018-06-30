@@ -423,11 +423,11 @@ def handle_comment_obj(commentObj):
     :return: 对应的dictionary格式
     """
     return {
-        'time' : commentObj.time,
+        'avatar': User.query.filter(User.username == commentObj.username).first().avator,
+        'date': str(commentObj.time),
         'rating': commentObj.rating,
-        'description': commentObj.description,
-        'username': commentObj.username,
-        'movieID': commentObj.movieID
+        'content': commentObj.description,
+        'username': commentObj.username
     }
 
 @app.route('/api/movies/<int:movie_id>', methods=['GET'])
@@ -840,12 +840,12 @@ def comment():
                 movie = Movie.query.filter(Movie.movieID == form['movieID']).first()
                 if movie:
                     jsonData['data']['movieName'] = movie.movieName
-                    comment = Comment(rating=form['rating'], description=form['comment'], username=user.username, movieID=movie.movieID)
+                    comment = Comment(rating=form['rating'], time=form['date'], description=form['comment'], username=user.username, movieID=movie.movieID)
                     db.session.add(comment)
                     db.session.commit()
                     jsonData['data']['commentID'] = comment.commentID
-                    jsonData['data']['comment'] = comment.description
-                    jsonData['data']['time'] = comment.time
+                    jsonData['data']['content'] = comment.description
+                    jsonData['data']['date'] = str(comment.time)
                     jsonData['data']['rating'] = comment.rating
                     jsonData['status'] = 200
                     jsonData['message'] = 'comments succeed'
