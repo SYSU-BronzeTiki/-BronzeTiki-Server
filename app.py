@@ -416,6 +416,20 @@ def get_search_result():
     message = json.dumps(jsonData)
     return message
 
+def handle_comment_obj(commentObj):
+    """
+    将ORM返回的comment 对象转换成对应的dictionary
+    :param commentObj:
+    :return: 对应的dictionary格式
+    """
+    return {
+        'time' : commentObj.time,
+        'rating': commentObj.rating,
+        'description': commentObj.description,
+        'username': commentObj.username,
+        'movieID': commentObj.movieID
+    }
+
 @app.route('/api/movies/<int:movie_id>', methods=['GET'])
 def get_movie(movie_id):
     if request.method == 'GET':
@@ -438,6 +452,11 @@ def get_movie(movie_id):
             jsonData['data']['status'] = result.isOnShow
             jsonData['message'] = 'movie found'
             jsonData['status'] = 200
+            comments = []
+            for item in Comment.query.filter(Comment.movieID == movie_id).all():
+                tmp_comment = handle_comment_obj(item)
+                comments.append(tmp_comment)
+            jsonData['data']['comments'] = comments
             # id: 电影标识
             # poster： 海报的url
             # rating: 评分（0-5）
