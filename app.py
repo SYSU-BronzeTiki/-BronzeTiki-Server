@@ -643,6 +643,7 @@ def orders():
             jsonData['message'] = 'Offline'
         else:
             username = session.get('username', 'none')
+            print(username)
             # username = '二狗子'
             orders = Order.query.filter(Order.username == username)
             if orders:
@@ -657,18 +658,21 @@ def orders():
                     order['isPayed'] = False if (o.payTime == None) else True
 
                     seats = Seat.query.filter(Seat.orderID == o.orderID)
-                    order['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
-                    screenId = seats.first().screenID
-                    screen = Screen.query.filter(Screen.screenID == screenId).first()
-                    movieId = screen.movieID
-                    movie = Movie.query.filter(Movie.movieID == movieId).first()
-                    order['movieName'] = movie.movieName
-                    order['poster'] = movie.poster
+                    if seats.count():
+                        order['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
+                        screenId = seats.first().screenID
+                        screen = Screen.query.filter(Screen.screenID == screenId).first()
+                        movieId = screen.movieID
+                        movie = Movie.query.filter(Movie.movieID == movieId).first()
+                        order['movieName'] = movie.movieName
+                        order['poster'] = movie.poster
+                        order['begin'] = str(screen.beginTime)
+                        order['hall'] = screen.movieHallID
+                    else:
+                        pass
                     order['orderBegin'] = str(o.genTime)
                     order['payTime'] = str(o.payTime)
                     order['isValid'] = False if (str(o.payTime) == "1000-01-01 00:00:00") else True
-                    order['begin'] = str(screen.beginTime)
-                    order['hall'] = str(screen.movieHallID)
                     jsonData['data']['orders'].append(order)
                 jsonData['status'] = 200
                 jsonData['message'] = 'orders succeed'
@@ -713,19 +717,22 @@ def get_order(order_id):
             jsonData['data']['total'] = order.price
             jsonData['data']['isPayed'] = False if (order.payTime == None or str(order.payTime) == "1000-01-01 00:00:00") else True
             try:
-                seats = Seat.query.filter(Seat.orderID == order.orderID)
-                jsonData['data']['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
-                screenId = seats.first().screenID
-                screen = Screen.query.filter(Screen.screenID == screenId).first()
-                movieId = screen.movieID
-                movie = Movie.query.filter(Movie.movieID == movieId).first()
-                jsonData['data']['movieName'] = movie.movieName
-                jsonData['data']['poster'] = movie.poster
-                jsonData['data']['begin'] = str(screen.beginTime)
+                if seats.count():
+                    seats = Seat.query.filter(Seat.orderID == order.orderID)
+                    jsonData['data']['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
+                    screenId = seats.first().screenID
+                    screen = Screen.query.filter(Screen.screenID == screenId).first()
+                    movieId = screen.movieID
+                    movie = Movie.query.filter(Movie.movieID == movieId).first()
+                    jsonData['data']['movieName'] = movie.movieName
+                    jsonData['data']['poster'] = movie.poster
+                    jsonData['data']['begin'] = str(screen.beginTime)
+                    jsonData['data']['hall'] = screen.movieHallID
+                else:
+                    pass
                 jsonData['data']['orderBegin'] = str(order.genTime)
                 jsonData['data']['payTime'] = str(order.payTime)
                 jsonData['data']['isValid'] = False if (str(order.payTime) == "1000-01-01 00:00:00") else True
-                jsonData['data']['hall'] = str(screen.movieHallID)
                 jsonData['status'] = 200
                 jsonData['message'] = 'orders succeed'
             except:
