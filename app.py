@@ -637,12 +637,16 @@ def orders():
                     order['isPayed'] = False if (o.payTime == None) else True
 
                     seats = Seat.query.filter(Seat.orderID == o.orderID)
-                    order['seats'] = [s.position for s in seats]
+                    order['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
                     screenId = seats.first().screenID
                     screen = Screen.query.filter(Screen.screenID == screenId).first()
                     movieId = screen.movieID
                     movie = Movie.query.filter(Movie.movieID == movieId).first()
                     order['movieName'] = movie.movieName
+                    order['poster'] = movie.poster
+                    order['orderBegin'] = str(o.genTime)
+                    order['payTime'] = str(o.payTime)
+                    order['isValid'] = False if (str(o.payTime) == "1000-01-01 00:00:00") else True
                     order['begin'] = str(screen.beginTime)
                     order['hall'] = str(screen.movieHallID)
                     jsonData['data']['orders'].append(order)
@@ -690,12 +694,13 @@ def get_order(order_id):
             jsonData['data']['isPayed'] = False if (order.payTime == None or str(order.payTime) == "1000-01-01 00:00:00") else True
             try:
                 seats = Seat.query.filter(Seat.orderID == order.orderID)
-                jsonData['data']['seats'] = [s.position for s in seats]
+                jsonData['data']['seats'] = [[int(i) for i in s.position[1:-1].split(',')] for s in seats]
                 screenId = seats.first().screenID
                 screen = Screen.query.filter(Screen.screenID == screenId).first()
                 movieId = screen.movieID
                 movie = Movie.query.filter(Movie.movieID == movieId).first()
                 jsonData['data']['movieName'] = movie.movieName
+                jsonData['data']['poster'] = movie.poster
                 jsonData['data']['begin'] = str(screen.beginTime)
                 jsonData['data']['orderBegin'] = str(order.genTime)
                 jsonData['data']['payTime'] = str(order.payTime)
