@@ -1,0 +1,19 @@
+{
+  "ret": true,
+  "data": {
+    "orderId": 12345,
+    "screenId": 2001,
+    "movieId": 2,
+    "movieName": "超时空同居",
+    "movieBegin": "2018-06-28 08:00",
+    "orderBegin": "2018-06-25 08:00",
+    "hall": 4,
+    "seats": [ [1, 2], [2, 3], [3, 4] ],
+    "phone": "13829000000",
+    "total": 90.00,
+    "isPayed": false,
+    "isValid": true
+  },
+  "status": true,
+  "errorMessage": ""
+}

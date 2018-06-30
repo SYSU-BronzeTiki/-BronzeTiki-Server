@@ -5,54 +5,54 @@
 		"movieName": "超时空同居",
 		"poster": "https://img1.doubanio.com/view/photo/s_ratio_poster/public/p2520331478.webp",
 		"selections": [{
-			"date": "06-14",
+			"date": "2018-06-27",
 			"screens": [{
 				"screenId": 2001,
-				"begin": "08:00",
-				"end": "10:00",
+				"begin": "2018-06-27 08:00",
+				"end": "2018-06-27 10:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 20
 			}, {
 				"screenId": 2002,
-				"begin": "12:00",
-				"end": "14:00",
+				"begin": "2018-06-27 12:00",
+				"end": "2018-06-27 14:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 0
 			}]
 		}, {
-			"date": "06-15",
+			"date": "2018-06-28",
 			"screens": [{
 				"screenId": 2004,
-				"begin": "08:00",
-				"end": "10:00",
+				"begin": "2018-06-28 08:00",
+				"end": "2018-06-28 10:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 20
 			}, {
 				"screenId": 2008,
-				"begin": "12:00",
-				"end": "14:00",
+				"begin": "2018-06-28 12:00",
+				"end": "2018-06-28 14:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 1
 			}]
 		}, {
-			"date": "06-16",
+			"date": "2018-06-29",
 			"screens": [{
 				"screenId": 2007,
-				"begin": "08:00",
-				"end": "10:00",
+				"begin": "2018-06-29 08:00",
+				"end": "2018-06-29 10:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 20
 			}, {
 				"screenId": 2010,
-				"begin": "12:00",
-				"end": "14:00",
+				"begin": "2018-06-29 12:00",
+				"end": "2018-06-29 14:00",
 				"hall": 4,
-				"prices": "42:00",
+				"price": "42:00",
 				"rest": 1
 			}]
 		}]

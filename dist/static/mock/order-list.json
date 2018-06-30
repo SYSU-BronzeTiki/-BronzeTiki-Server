@@ -1,0 +1,29 @@
+{
+    "ret": true,
+    "data": {
+        "orders": [
+            {
+              "orderId": 12345,
+              "movieName": "超时空同居",
+              "begin": "2018-06-01 星期一 08：00",
+              "hall": 4,
+              "seats": [ [1, 2], [2, 3], [3, 4] ],
+              "phone": "13829000000",
+              "total": 90.00,
+              "isPayed": false,
+              "isValid": true
+            },
+            {
+              "orderId": 12345,
+              "movieName": "复仇者联盟3：无限战争",
+              "begin": "2018-06-01 星期一 08：00",
+              "hall": 4,
+              "seats": [ [1, 2], [2, 3], [3, 4] ],
+              "phone": "13829000000",
+              "total": 90.00,
+              "isPayed": false,
+              "isValid": true
+            }
+        ]
+    }
+}
