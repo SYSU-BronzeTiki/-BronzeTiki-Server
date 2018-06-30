@@ -555,6 +555,7 @@ def invalidOrderWorker(orderId):
             s.isAvailable = True
             s.orderID = None
         db.session.commit()
+    #print("order {} is invalid".format(orderId))
 
 @app.route('/api/orders', methods=['GET', 'POST'])
 def orders():
@@ -619,7 +620,7 @@ def orders():
                     jsonData['data']['isValid'] = True
 
                     # invalidate this order after 300s
-                    threading.Timer(300, invalidOrderWorker, (order.orderID)).start()
+                    threading.Timer(orderTimeOut, invalidOrderWorker, (order.orderID, )).start()
 
                     jsonData['status'] = 200
                     jsonData['message'] = 'seats succeed'
@@ -761,7 +762,7 @@ def get_order(order_id):
                 jsonData['status'] = 0
             else:
                 if check_the_paypassword(username, form['password'], result.price, jsonData):
-                    result.payTime = datetime.datetime.utcnow()
+                    result.payTime = datetime.datetime.now()
                     db.session.commit()
                     jsonData['data']['orderId'] = order_id
                     jsonData['message'] = 'Update succeed'

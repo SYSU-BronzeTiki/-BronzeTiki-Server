@@ -11,6 +11,7 @@ db = SQLAlchemy(app)
 
 salt = "2sjx*7sa8*(0&^@9de2-fd23+fd*/ds"
 paySalt = "sd$S#A*%${ds]dddfa}d54789eqw16^&^d<?dss"
+orderTimeOut = 300
 
 # Data table User
 # create table user (
@@ -94,7 +95,7 @@ class Movie(db.Model):
 class Comment(db.Model):
     __tablename__ = 'comment'
     commentID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    time = db.Column(db.DateTime, default=datetime.datetime.now)
     rating = db.Column(db.Integer)
     description = db.Column(db.String(256))
     username = db.Column(db.String(50), db.ForeignKey('user.username'))
@@ -134,7 +135,7 @@ class MovieHall(db.Model):
 class Screen(db.Model):
     __tablename__ = 'screen'
     screenID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    beginTime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    beginTime = db.Column(db.DateTime, default=datetime.datetime.now)
     ticketPrice = db.Column(db.Float)
     movieHallID = db.Column(db.Integer)
     movieID = db.Column(db.Integer)
@@ -193,7 +194,7 @@ class Seat(db.Model):
 class Order(db.Model):
     __tablename__ = 'movieorder'
     orderID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    genTime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    genTime = db.Column(db.DateTime, default=datetime.datetime.now)
     payTime = db.Column(db.DateTime)
     price = db.Column(db.Integer)
     username = db.Column(db.String(50), db.ForeignKey('user.username'))
