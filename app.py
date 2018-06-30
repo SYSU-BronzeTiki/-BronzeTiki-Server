@@ -416,6 +416,20 @@ def get_search_result():
     message = json.dumps(jsonData)
     return message
 
+def handle_comment_obj(commentObj):
+    """
+    将ORM返回的comment 对象转换成对应的dictionary
+    :param commentObj:
+    :return: 对应的dictionary格式
+    """
+    return {
+        'avatar': User.query.filter(User.username == commentObj.username).first().avator,
+        'date': str(commentObj.time),
+        'rating': commentObj.rating,
+        'content': commentObj.description,
+        'username': commentObj.username
+    }
+
 @app.route('/api/movies/<int:movie_id>', methods=['GET'])
 def get_movie(movie_id):
     if request.method == 'GET':
@@ -438,6 +452,11 @@ def get_movie(movie_id):
             jsonData['data']['status'] = result.isOnShow
             jsonData['message'] = 'movie found'
             jsonData['status'] = 200
+            comments = []
+            for item in Comment.query.filter(Comment.movieID == movie_id).all():
+                tmp_comment = handle_comment_obj(item)
+                comments.append(tmp_comment)
+            jsonData['data']['comments'] = comments
             # id: 电影标识
             # poster： 海报的url
             # rating: 评分（0-5）
@@ -826,12 +845,12 @@ def comment():
                 movie = Movie.query.filter(Movie.movieID == form['movieID']).first()
                 if movie:
                     jsonData['data']['movieName'] = movie.movieName
-                    comment = Comment(rating=form['rating'], description=form['comment'], username=user.username, movieID=movie.movieID)
+                    comment = Comment(rating=form['rating'], time=form['date'], description=form['comment'], username=user.username, movieID=movie.movieID)
                     db.session.add(comment)
                     db.session.commit()
                     jsonData['data']['commentID'] = comment.commentID
-                    jsonData['data']['comment'] = comment.description
-                    jsonData['data']['time'] = comment.time
+                    jsonData['data']['content'] = comment.description
+                    jsonData['data']['date'] = str(comment.time)
                     jsonData['data']['rating'] = comment.rating
                     jsonData['status'] = 200
                     jsonData['message'] = 'comments succeed'
